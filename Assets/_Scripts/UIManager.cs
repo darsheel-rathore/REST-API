@@ -57,6 +57,7 @@ public class UIManager : MonoBehaviour
     public void BTN_CatFactsAPI() => REST_Manager.instance.CatFactAPI();
     public void BTN_MainMenu()
     {
+        StopAllCoroutines();
         CloseAllCanvas();
         mainMenuCanvas.SetActive(true);
     }
@@ -150,9 +151,11 @@ public class UIManager : MonoBehaviour
         knowYourIPText.text = knowYourIP.ip;
     }
 
-    public void ShowRandomDogImage()
+    public void ShowRandomDogImage(Sprite dogImage)
     {
-        // Show the image
+        CloseAllCanvas();
+        randomDogImageAPICanvas.SetActive(true);
+        randomDogImage.sprite = dogImage;
     }
     #endregion
 }

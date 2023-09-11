@@ -154,13 +154,34 @@ public class REST_Manager : MonoBehaviour
         if (www.result == UnityWebRequest.Result.Success)
         {
             string response = www.downloadHandler.text;
-            RandomDogImageResponse randomDogImage = JsonUtility.FromJson<RandomDogImageResponse>(response);
-            Debug.Log(response);
+            RandomDogImageResponse randomDogImageResponse = JsonUtility.FromJson<RandomDogImageResponse>(response);
+            
+            StartCoroutine(DownloadImage(randomDogImageResponse.message));
         }
         else
         {
             // Show some UI Element
             Debug.LogWarning("DOG API Request Failed!!");
+        }
+    }
+
+    IEnumerator DownloadImage(string urlOfDogRandomPicture)
+    {
+        UnityWebRequest www = UnityWebRequestTexture.GetTexture(urlOfDogRandomPicture);
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            //var texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
+            Texture2D texture = DownloadHandlerTexture.GetContent(www);
+            var imageSprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0, 1f));
+
+            // send this image to the UI
+            UIManager.instance.ShowRandomDogImage(imageSprite);
+        }
+        else
+        {
+            Debug.Log("Failed to download Image");
         }
     }
 
