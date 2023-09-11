@@ -29,6 +29,9 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI knowYourIPText;
     public GameObject knowYourIPCanvas;
 
+    [Header("Dog Image")]
+    public GameObject randomDogImageAPICanvas;
+    public Image randomDogImage;
 
     private void Awake()
     {
@@ -64,6 +67,8 @@ public class UIManager : MonoBehaviour
     }
     public void BTN_GuessNationality() => REST_Manager.instance.GuessNationality(nameInputField);
     public void BTN_KnowYourIP() => REST_Manager.instance.KnowYourIP();
+
+    public void BTN_RandomDogImage() => REST_Manager.instance.RandomDogImage();
     #endregion
 
     private void CloseAllCanvas()
@@ -73,6 +78,7 @@ public class UIManager : MonoBehaviour
         catFactAPICanvas.SetActive(false);
         guessNationalityCanvas.SetActive(false);
         knowYourIPCanvas.SetActive(false);
+        randomDogImageAPICanvas.SetActive(false);
     }
 
     #region Main-Menu-Btn-Instruction
@@ -142,6 +148,11 @@ public class UIManager : MonoBehaviour
         knowYourIPCanvas.SetActive(true);
 
         knowYourIPText.text = knowYourIP.ip;
+    }
+
+    public void ShowRandomDogImage()
+    {
+        // Show the image
     }
     #endregion
 }

@@ -58,6 +58,11 @@ public class REST_Manager : MonoBehaviour
         StartCoroutine(FindYourIPCoroutine());
     }
 
+    public void RandomDogImage()
+    {
+        StartCoroutine(RandomDogImageCoroutine());
+    }
+
     #region Coroutines
     IEnumerator PubliAPIsCoroutine()
     {
@@ -134,6 +139,30 @@ public class REST_Manager : MonoBehaviour
             KnowYourIP knowYourIP = JsonUtility.FromJson<KnowYourIP>(response);
             UIManager.instance.ShowYourIP(knowYourIP);
         }
+        else
+        {
+            // Show some UI Element
+            Debug.LogWarning("IP API Request Failed!!");
+        }
     }
+
+    IEnumerator RandomDogImageCoroutine()
+    {
+        UnityWebRequest www = UnityWebRequest.Get(APIs._Dogs);
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            string response = www.downloadHandler.text;
+            RandomDogImageResponse randomDogImage = JsonUtility.FromJson<RandomDogImageResponse>(response);
+            Debug.Log(response);
+        }
+        else
+        {
+            // Show some UI Element
+            Debug.LogWarning("DOG API Request Failed!!");
+        }
+    }
+
     #endregion
 }
