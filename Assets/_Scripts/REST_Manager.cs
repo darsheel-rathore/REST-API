@@ -74,7 +74,7 @@ public class REST_Manager : MonoBehaviour
         if(www.result == UnityWebRequest.Result.Success)
         {
             string response = www.downloadHandler.text;
-            
+            // Deserialize the JSON response into a C# object
             publicAPIResponse = JsonUtility.FromJson<PublicAPIResponse>(response);
 
             // UI to enable the panel
@@ -97,6 +97,7 @@ public class REST_Manager : MonoBehaviour
         if(www.result == UnityWebRequest.Result.Success )
         {
             string response = www.downloadHandler.text;
+            // Deserialize the JSON response into a C# object
             catfactAPIResponse = JsonUtility.FromJson<CatFactsAPIResponse>(response);
 
             // UI to enable the panel
@@ -120,6 +121,7 @@ public class REST_Manager : MonoBehaviour
         if (www.result == UnityWebRequest.Result.Success)
         {
             string response = www.downloadHandler.text;
+            // Deserialize the JSON response into a C# object
             nationalityAPIResponse = JsonUtility.FromJson<NationalityAPIResponse>(response);
 
             UIManager.instance.ShowNationality(nationalityAPIResponse);
@@ -141,6 +143,7 @@ public class REST_Manager : MonoBehaviour
         if(www.result == UnityWebRequest.Result.Success)
         {
             string response = www.downloadHandler.text;
+            // Deserialize the JSON response into a C# object
             KnowYourIP knowYourIP = JsonUtility.FromJson<KnowYourIP>(response);
             UIManager.instance.ShowYourIP(knowYourIP);
             UIManager.instance.LoadingPanel(false);
@@ -161,6 +164,7 @@ public class REST_Manager : MonoBehaviour
         if (www.result == UnityWebRequest.Result.Success)
         {
             string response = www.downloadHandler.text;
+            // Deserialize the JSON response into a C# object
             RandomDogImageResponse randomDogImageResponse = JsonUtility.FromJson<RandomDogImageResponse>(response);
             
             StartCoroutine(DownloadImage(randomDogImageResponse.message));
@@ -205,6 +209,7 @@ public class REST_Manager : MonoBehaviour
         if(www.result == UnityWebRequest.Result.Success)
         {
             string response = www.downloadHandler.text;
+            // Deserialize the JSON response into a C# object
             searchZipCodeResponse = JsonUtility.FromJson<SearchZipCodeResponse>(response);
 
             Debug.Log(response);
