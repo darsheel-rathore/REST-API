@@ -7,6 +7,7 @@ using TMPro;
 public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
+    public GameObject loadingPanel;
 
     [Header("Main Menu")]
     public GameObject mainMenuCanvas;
@@ -38,7 +39,6 @@ public class UIManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -57,7 +57,7 @@ public class UIManager : MonoBehaviour
     public void BTN_CatFactsAPI() => REST_Manager.instance.CatFactAPI();
     public void BTN_MainMenu()
     {
-        StopAllCoroutines();
+        //StopAllCoroutines();
         CloseAllCanvas();
         mainMenuCanvas.SetActive(true);
     }
@@ -70,16 +70,34 @@ public class UIManager : MonoBehaviour
     public void BTN_KnowYourIP() => REST_Manager.instance.KnowYourIP();
 
     public void BTN_RandomDogImage() => REST_Manager.instance.RandomDogImage();
+
+    public void BTN_SearchZipCode() => REST_Manager.instance.SearchZipCode();
     #endregion
 
     private void CloseAllCanvas()
     {
+        loadingPanel.SetActive(false);
         mainMenuCanvas.SetActive(false);
         publicAPICanvas.SetActive(false);
         catFactAPICanvas.SetActive(false);
         guessNationalityCanvas.SetActive(false);
         knowYourIPCanvas.SetActive(false);
         randomDogImageAPICanvas.SetActive(false);
+
+        // Close the loading panel 
+        LoadingPanel(false);
+    }
+
+    public void LoadingPanel(bool value = false, string message = "Loading...")
+    {
+        loadingPanel.GetComponentInChildren<TextMeshProUGUI>().text = message;
+        loadingPanel.SetActive(value);
+
+        if (!string.Equals("Loading...", message))
+        {
+            loadingPanel.GetComponentInChildren<Slider>().gameObject.SetActive(false);
+            loadingPanel.SetActive(true);
+        }
     }
 
     #region Main-Menu-Btn-Instruction

@@ -17,4 +17,6 @@ public static class APIs
     public const string _Jokes = "https://official-joke-api.appspot.com/random_joke";
 
     public const string _IP = "https://api.ipify.org?format=json";
+
+    public const string _Zippopotam = "https://api.zippopotam.us/us/";
 }
