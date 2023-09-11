@@ -8,12 +8,16 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
 
-    // Panels
-    public GameObject mainMenuPanel;
-    public GameObject publicAPIPanel;
+    // Canvas Reference
+    public GameObject mainMenuCanvas;
+    public GameObject publicAPICanvas;
+    public GameObject catFactAPICanvas;
 
-    // Prefabs
+    // PUblic API Prefabs
     public GameObject patternPrefab;
+
+    // Cat Fact Ref
+    public TextMeshProUGUI catFactText;
 
     // Instantiate Location
     public GameObject publicAPIPatternPrefabInstantiateLocation;
@@ -31,27 +35,46 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    #region Main-Menu-BTN
+    private void Start()
+    {
+        CloseAllCanvas();
+        mainMenuCanvas.SetActive(true);
+    }
+
+    #region BTN
     public void BTN_PublicAPIs()
     {
         REST_Manager.instance.PublicAPIs();
     }
-    #endregion
 
-    private void CloseAllPanel()
+    public void BTN_CatFactsAPI()
     {
-        mainMenuPanel.SetActive(false);
-        publicAPIPanel.SetActive(false);
+        REST_Manager.instance.CatFactAPI();
     }
 
-    public void ShowPubliAPIPanel(PublicAPIResponse response)
+    public void BTN_MainMenu()
     {
-        CloseAllPanel();
-        publicAPIPanel.SetActive(true);
+        CloseAllCanvas();
+        mainMenuCanvas.SetActive(true);
+    }
+    #endregion
+
+    private void CloseAllCanvas()
+    {
+        mainMenuCanvas.SetActive(false);
+        publicAPICanvas.SetActive(false);
+        catFactAPICanvas.SetActive(false);
+    }
+
+    #region Main-Menu-Btn-Instruction
+    public void ShowPubliAPICanvas(PublicAPIResponse response)
+    {
+        CloseAllCanvas();
+        publicAPICanvas.SetActive(true);
 
         List<PublicAPIInfo> publicAPIInfo = response.entries;
 
-        int totalIteration = 10;
+        int totalIteration = 20;
 
         for(int i = 0; i < totalIteration; i++)
         {
@@ -82,4 +105,13 @@ public class UIManager : MonoBehaviour
         }
         //Instantiate(patternPrefab, patternPrefab.transform.position, Quaternion.identity, publicAPIPatternPrefabInstantiateLocation.transform);
     }
+
+    public void ShowCatFactAPICanvas(CatFactsAPIResponse response)
+    {
+        CloseAllCanvas();
+        catFactAPICanvas.SetActive(true);
+
+        catFactText.text = response.fact;
+    }
+    #endregion
 }
