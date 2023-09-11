@@ -8,19 +8,27 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
 
-    // Canvas Reference
+    [Header("Main Menu")]
     public GameObject mainMenuCanvas;
+
+    [Header("Public API")]
+    public GameObject patternPrefab;
+    public GameObject publicAPIPatternPrefabInstantiateLocation;
     public GameObject publicAPICanvas;
+
+    [Header("Cat Facts")]
+    public TextMeshProUGUI catFactText;
     public GameObject catFactAPICanvas;
 
-    // PUblic API Prefabs
-    public GameObject patternPrefab;
+    [Header("Guess Nationality")]
+    public TMP_InputField nameInputField;
+    public GameObject guessNationalityCanvas;
+    public GameObject apiResponsePanel;
 
-    // Cat Fact Ref
-    public TextMeshProUGUI catFactText;
+    [Header("Know Your IP")]
+    public TextMeshProUGUI knowYourIPText;
+    public GameObject knowYourIPCanvas;
 
-    // Instantiate Location
-    public GameObject publicAPIPatternPrefabInstantiateLocation;
 
     private void Awake()
     {
@@ -42,21 +50,20 @@ public class UIManager : MonoBehaviour
     }
 
     #region BTN
-    public void BTN_PublicAPIs()
-    {
-        REST_Manager.instance.PublicAPIs();
-    }
-
-    public void BTN_CatFactsAPI()
-    {
-        REST_Manager.instance.CatFactAPI();
-    }
-
+    public void BTN_PublicAPIs() => REST_Manager.instance.PublicAPIs();
+    public void BTN_CatFactsAPI() => REST_Manager.instance.CatFactAPI();
     public void BTN_MainMenu()
     {
         CloseAllCanvas();
         mainMenuCanvas.SetActive(true);
     }
+    public void BTN_GuessNationalityMainMenu()
+    {
+        CloseAllCanvas();
+        guessNationalityCanvas.SetActive(true);
+    }
+    public void BTN_GuessNationality() => REST_Manager.instance.GuessNationality(nameInputField);
+    public void BTN_KnowYourIP() => REST_Manager.instance.KnowYourIP();
     #endregion
 
     private void CloseAllCanvas()
@@ -64,6 +71,8 @@ public class UIManager : MonoBehaviour
         mainMenuCanvas.SetActive(false);
         publicAPICanvas.SetActive(false);
         catFactAPICanvas.SetActive(false);
+        guessNationalityCanvas.SetActive(false);
+        knowYourIPCanvas.SetActive(false);
     }
 
     #region Main-Menu-Btn-Instruction
@@ -112,6 +121,27 @@ public class UIManager : MonoBehaviour
         catFactAPICanvas.SetActive(true);
 
         catFactText.text = response.fact;
+    }
+
+    public void ShowNationality(NationalityAPIResponse response)
+    {
+        TextMeshProUGUI[] text = apiResponsePanel.GetComponentsInChildren<TextMeshProUGUI>();
+
+        text[0].text = $"Name: {response.name}";
+        List<NationalityInfo> countryList = response.country;
+
+        for (int i = 0; i < 3; i++) 
+        {
+            text[i + 2].text = $"Country: {countryList[i].country_id} | Probability: {countryList[i].probability}%";
+        }
+    }
+
+    public void ShowYourIP(KnowYourIP knowYourIP)
+    {
+        CloseAllCanvas();
+        knowYourIPCanvas.SetActive(true);
+
+        knowYourIPText.text = knowYourIP.ip;
     }
     #endregion
 }

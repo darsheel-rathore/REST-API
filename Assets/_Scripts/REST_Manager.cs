@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -9,18 +11,28 @@ public class REST_Manager : MonoBehaviour
 
     [SerializeField] public PublicAPIResponse publicAPIResponse;
     [SerializeField] public CatFactsAPIResponse catfactAPIResponse;
+    [SerializeField] public NationalityAPIResponse nationalityAPIResponse;
+    [SerializeField] public KnowYourIP knowYourIP;
 
     private void Awake()
     {
         if(instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
+
+        publicAPIResponse = null;
+        catfactAPIResponse = null;
+        nationalityAPIResponse = null;
+    }
+
+    private void Start()
+    {
+        
     }
 
     public void PublicAPIs()
@@ -31,6 +43,19 @@ public class REST_Manager : MonoBehaviour
     public void CatFactAPI()
     {
         StartCoroutine(CatFactAPICoroutine());
+    }
+
+    public void GuessNationality(TMP_InputField nameInputField)
+    {
+        string nameText = nameInputField.text.Trim();
+        StartCoroutine(GuessNationalityCoroutine(nameText));
+        
+        //CheckString(nameText);
+    }
+
+    public void KnowYourIP()
+    {
+        StartCoroutine(FindYourIPCoroutine());
     }
 
     #region Coroutines
@@ -72,6 +97,42 @@ public class REST_Manager : MonoBehaviour
         {
             // Show some UI Element
             Debug.LogWarning("Cat Fact API Request Failed!!");
+        }
+    }
+
+    IEnumerator GuessNationalityCoroutine(string nameText)
+    {
+        string URL = APIs._NationalizeIO + nameText;
+
+        UnityWebRequest www = UnityWebRequest.Get(URL.ToString());
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            string response = www.downloadHandler.text;
+            nationalityAPIResponse = JsonUtility.FromJson<NationalityAPIResponse>(response);
+
+            UIManager.instance.ShowNationality(nationalityAPIResponse);
+
+            //Debug.Log(response);
+        }
+        else
+        {
+            // Show some UI Element
+            Debug.LogWarning("Nationality API Request Failed!!");
+        }
+    }
+    
+    IEnumerator FindYourIPCoroutine()
+    {
+        UnityWebRequest www = UnityWebRequest.Get(APIs._IP);
+        yield return www.SendWebRequest();
+
+        if(www.result == UnityWebRequest.Result.Success)
+        {
+            string response = www.downloadHandler.text;
+            KnowYourIP knowYourIP = JsonUtility.FromJson<KnowYourIP>(response);
+            UIManager.instance.ShowYourIP(knowYourIP);
         }
     }
     #endregion
