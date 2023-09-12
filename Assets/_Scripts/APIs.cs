@@ -18,7 +18,7 @@ public static class APIs
 
     public const string _IP = "https://api.ipify.org?format=json";
 
-    public const string _Zippopotam = "https://api.zippopotam.us/us/";
+    public const string _Zippopotam = "https://api.zippopotam.us/IN/";
 }
 
 public static class CanvasName

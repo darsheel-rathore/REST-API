@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-using UnityEngine.EventSystems;
 
 public class UIAnimationManager : MonoBehaviour
 {
@@ -16,6 +15,8 @@ public class UIAnimationManager : MonoBehaviour
     private Vector2 yStartingPos = new Vector2(0f, -900f);
     private Vector2 renderArea = Vector2.zero;
     public float canvasAnimationDuration = 2f;
+
+    public CanvasGroup mainMenuCanvasGroup;
 
     Button[] mainMenuButtons;
 
@@ -52,6 +53,10 @@ public class UIAnimationManager : MonoBehaviour
         // Set Initial transform position
         mainMenuCanvas.anchoredPosition = xStartingPos;
 
+        // Set the initial canvas alpha value 0
+        mainMenuCanvasGroup = mainMenuCanvas.GetComponent<CanvasGroup>();
+        mainMenuCanvasGroup.alpha = 0;
+
         // Starup Animation
         StartCoroutine(MainMenuStartUpAnimationCoroutine());
     }
@@ -59,6 +64,8 @@ public class UIAnimationManager : MonoBehaviour
     IEnumerator MainMenuStartUpAnimationCoroutine()
     {
         mainMenuCanvas.DOAnchorPos(renderArea, canvasAnimationDuration);
+        mainMenuCanvasGroup.DOFade(1f, canvasAnimationDuration);
+
         ToggleButtonInteractions(false);
 
         yield return new WaitForSeconds(canvasAnimationDuration);
