@@ -48,23 +48,23 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        CloseAllCanvas();
+        //CloseAllCanvas();
         mainMenuCanvas.SetActive(true);
     }
 
     #region BTN
-    public void BTN_PublicAPIs() => REST_Manager.instance.PublicAPIs();
+    public void BTN_PublicAPIs() =>REST_Manager.instance.PublicAPIs();
     public void BTN_CatFactsAPI() => REST_Manager.instance.CatFactAPI();
     public void BTN_MainMenu()
     {
-        //StopAllCoroutines();
-        CloseAllCanvas();
         mainMenuCanvas.SetActive(true);
+        UIAnimationManager.instance.OnClickCloseButton();
     }
     public void BTN_GuessNationalityMainMenu()
     {
-        CloseAllCanvas();
+        //CloseAllCanvas();
         guessNationalityCanvas.SetActive(true);
+        UIAnimationManager.instance.MoveCanvasUp(CanvasName._NationalityCanvas);
     }
     public void BTN_GuessNationality() => REST_Manager.instance.GuessNationality(nameInputField);
     public void BTN_KnowYourIP() => REST_Manager.instance.KnowYourIP();
@@ -74,10 +74,9 @@ public class UIManager : MonoBehaviour
     public void BTN_SearchZipCode() => REST_Manager.instance.SearchZipCode();
     #endregion
 
-    private void CloseAllCanvas()
+    public void CloseAllCanvas()
     {
         loadingPanel.SetActive(false);
-        mainMenuCanvas.SetActive(false);
         publicAPICanvas.SetActive(false);
         catFactAPICanvas.SetActive(false);
         guessNationalityCanvas.SetActive(false);
@@ -103,7 +102,6 @@ public class UIManager : MonoBehaviour
     #region Main-Menu-Btn-Instruction
     public void ShowPubliAPICanvas(PublicAPIResponse response)
     {
-        CloseAllCanvas();
         publicAPICanvas.SetActive(true);
 
         List<PublicAPIInfo> publicAPIInfo = response.entries;
@@ -142,7 +140,6 @@ public class UIManager : MonoBehaviour
 
     public void ShowCatFactAPICanvas(CatFactsAPIResponse response)
     {
-        CloseAllCanvas();
         catFactAPICanvas.SetActive(true);
 
         catFactText.text = response.fact;
@@ -163,15 +160,12 @@ public class UIManager : MonoBehaviour
 
     public void ShowYourIP(KnowYourIP knowYourIP)
     {
-        CloseAllCanvas();
         knowYourIPCanvas.SetActive(true);
-
         knowYourIPText.text = knowYourIP.ip;
     }
 
     public void ShowRandomDogImage(Sprite dogImage)
     {
-        CloseAllCanvas();
         randomDogImageAPICanvas.SetActive(true);
         randomDogImage.sprite = dogImage;
     }

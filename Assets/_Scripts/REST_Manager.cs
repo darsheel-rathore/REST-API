@@ -9,6 +9,8 @@ public class REST_Manager : MonoBehaviour
 {
     public static REST_Manager instance;
 
+    public UIAnimationManager animationManager;
+
     [SerializeField] public PublicAPIResponse publicAPIResponse;
     [SerializeField] public CatFactsAPIResponse catfactAPIResponse;
     [SerializeField] public NationalityAPIResponse nationalityAPIResponse;
@@ -32,7 +34,7 @@ public class REST_Manager : MonoBehaviour
     }
     private void Start()
     {
-        
+        animationManager = UIAnimationManager.instance;
     }
 
     public void PublicAPIs()
@@ -47,8 +49,6 @@ public class REST_Manager : MonoBehaviour
     {
         string nameText = nameInputField.text.Trim();
         StartCoroutine(GuessNationalityCoroutine(nameText));
-        
-        //CheckString(nameText);
     }
     public void KnowYourIP()
     {
@@ -69,8 +69,9 @@ public class REST_Manager : MonoBehaviour
     {
         UnityWebRequest www = UnityWebRequest.Get(APIs._PublicAPIs);
         UIManager.instance.LoadingPanel(true);
-        yield return www.SendWebRequest();
+        animationManager.ToggleButtonInteractions(false);
         
+        yield return www.SendWebRequest();
         if(www.result == UnityWebRequest.Result.Success)
         {
             string response = www.downloadHandler.text;
@@ -80,6 +81,9 @@ public class REST_Manager : MonoBehaviour
             // UI to enable the panel
             UIManager.instance.ShowPubliAPICanvas(publicAPIResponse);
             UIManager.instance.LoadingPanel(false);
+
+            // Enable animation
+            animationManager.MoveCanvasUp(CanvasName._PubliAPICanvas);
         }
         else
         {
@@ -92,6 +96,7 @@ public class REST_Manager : MonoBehaviour
     {
         UnityWebRequest www = UnityWebRequest.Get(APIs._CatFacts);
         UIManager.instance.LoadingPanel(true);
+        animationManager.ToggleButtonInteractions(false);
         yield return www.SendWebRequest();
 
         if(www.result == UnityWebRequest.Result.Success )
@@ -103,6 +108,9 @@ public class REST_Manager : MonoBehaviour
             // UI to enable the panel
             UIManager.instance.ShowCatFactAPICanvas(catfactAPIResponse);
             UIManager.instance.LoadingPanel(false);
+
+            // Enable animation
+            animationManager.MoveCanvasUp(CanvasName._CatFactCanvas);
         }
         else
         {
@@ -132,12 +140,14 @@ public class REST_Manager : MonoBehaviour
         {
             // Show some UI Element
             Debug.LogWarning("Nationality API Request Failed!!");
+            UIManager.instance.LoadingPanel(message: "Nationality API Request Failed!!");
         }
     }   
     IEnumerator FindYourIPCoroutine()
     {
         UnityWebRequest www = UnityWebRequest.Get(APIs._IP);
         UIManager.instance.LoadingPanel(true);
+        animationManager.ToggleButtonInteractions(false);
         yield return www.SendWebRequest();
 
         if(www.result == UnityWebRequest.Result.Success)
@@ -147,6 +157,10 @@ public class REST_Manager : MonoBehaviour
             KnowYourIP knowYourIP = JsonUtility.FromJson<KnowYourIP>(response);
             UIManager.instance.ShowYourIP(knowYourIP);
             UIManager.instance.LoadingPanel(false);
+
+            // Enable animation
+            animationManager.MoveCanvasUp(CanvasName._KnowYourIPCanvas);
+
         }
         else
         {
@@ -159,6 +173,7 @@ public class REST_Manager : MonoBehaviour
     {
         UnityWebRequest www = UnityWebRequest.Get(APIs._Dogs);
         UIManager.instance.LoadingPanel(true);
+        animationManager.ToggleButtonInteractions(false);
         yield return www.SendWebRequest();
 
         if (www.result == UnityWebRequest.Result.Success)
@@ -190,6 +205,10 @@ public class REST_Manager : MonoBehaviour
             UIManager.instance.ShowRandomDogImage(imageSprite);
 
             UIManager.instance.LoadingPanel(false);
+
+            // Enable animation
+            animationManager.MoveCanvasUp(CanvasName._RandomDogImageCanvas);
+
         }
         else
         {
