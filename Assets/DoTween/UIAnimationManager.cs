@@ -3,22 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Newtonsoft.Json.Linq;
 
 public class UIAnimationManager : MonoBehaviour
 {
     public static UIAnimationManager instance;
+    public float canvasAnimationDuration = 0.5f;
 
-    public RectTransform mainMenuCanvas;
-    Dictionary<string, RectTransform> canvasRectDictionary;
+    [SerializeField] RectTransform mainMenuCanvas;
+    [SerializeField] RectTransform publicApiCanvas;
+    [SerializeField] RectTransform catFactCanvas;
+    [SerializeField] RectTransform nationalityCanvas;
+    [SerializeField] RectTransform knowYourIPCanvas;
+    [SerializeField] RectTransform randomDogImageCanvas;
+    [SerializeField] RectTransform zipcodeCanvas;
+    [SerializeField] GameObject LoadingPanel;
+    [SerializeField] Button[] mainMenuButtons;
+
+    private Dictionary<string, RectTransform> canvasRectDictionary;
 
     private Vector2 xStartingPos = new Vector2(-1600f, 0);
     private Vector2 yStartingPos = new Vector2(0f, -900f);
     private Vector2 renderArea = Vector2.zero;
-    public float canvasAnimationDuration = 0.5f;
 
-    public CanvasGroup mainMenuCanvasGroup;
-
-    Button[] mainMenuButtons;
+    private CanvasGroup mainMenuCanvasGroup;
 
     private void Awake()
     {
@@ -28,15 +36,6 @@ public class UIAnimationManager : MonoBehaviour
 
     void Start()
     {
-        mainMenuCanvas = UIManager.instance.mainMenuCanvas.GetComponent<RectTransform>();
-
-        RectTransform publicApiCanvas = UIManager.instance.publicAPICanvas.GetComponent<RectTransform>();
-        RectTransform catFactCanvas = UIManager.instance.catFactAPICanvas.GetComponent<RectTransform>();
-        RectTransform nationalityCanvas = UIManager.instance.guessNationalityCanvas.GetComponent<RectTransform>();
-        RectTransform knowYourIPCanvas = UIManager.instance.knowYourIPCanvas.GetComponent<RectTransform>();
-        RectTransform randomDogImageCanvas = UIManager.instance.randomDogImageAPICanvas.GetComponent<RectTransform>();
-        RectTransform zipcodeCanvas = UIManager.instance.zipcodeAPICanvas.GetComponent<RectTransform>();
-
         canvasRectDictionary.Add(publicApiCanvas.gameObject.name, publicApiCanvas);
         canvasRectDictionary.Add(catFactCanvas.gameObject.name, catFactCanvas);
         canvasRectDictionary.Add(nationalityCanvas.gameObject.name, nationalityCanvas);
@@ -49,9 +48,6 @@ public class UIAnimationManager : MonoBehaviour
             canvas.Value.anchoredPosition = yStartingPos;
         }
 
-        // Grab all the buttons
-        mainMenuButtons = UIManager.instance.gameObject.GetComponentsInChildren<Button>();
-
         // Set Initial transform position
         mainMenuCanvas.anchoredPosition = xStartingPos;
 
@@ -60,28 +56,39 @@ public class UIAnimationManager : MonoBehaviour
         mainMenuCanvasGroup.alpha = 0;
 
         // Starup Animation
-        StartCoroutine(MainMenuStartUpAnimationCoroutine());
+        MainMenuStartUpAnimationCoroutine();
     }
 
-    IEnumerator MainMenuStartUpAnimationCoroutine()
+    private void MainMenuStartUpAnimationCoroutine()
     {
-        mainMenuCanvas.DOAnchorPos(renderArea, canvasAnimationDuration);
-        mainMenuCanvasGroup.DOFade(1f, canvasAnimationDuration);
-
         ToggleButtonInteractions(false);
 
-        yield return new WaitForSeconds(canvasAnimationDuration);
+        mainMenuCanvas.DOAnchorPos(renderArea, canvasAnimationDuration).OnComplete(() => {
+            ToggleButtonInteractions(true);
+        });
 
-        ToggleButtonInteractions(true);
+        mainMenuCanvasGroup.DOFade(1f, canvasAnimationDuration);
     }
 
     public void MainMenuCanvasMoveOutSideRenderArea()
     {
-        StartCoroutine(MainMenuCanvasMoveOutSideRenderAreaCoroutine());
+        ToggleButtonInteractions(false);
+
+        mainMenuCanvas.DOAnchorPos(yStartingPos * -1, canvasAnimationDuration).OnComplete(() => {
+
+            ToggleButtonInteractions(true);
+            mainMenuCanvas.gameObject.SetActive(false);
+        });
     }
     public void MainMenuCanvasMoveToRenderArea() 
-    { 
-        StartCoroutine(MainMenuCanvasMoveToRenderAreaCoroutine());
+    {
+        ToggleButtonInteractions(false);
+        mainMenuCanvas.gameObject.SetActive(true);
+
+        mainMenuCanvas.DOAnchorPos(renderArea, canvasAnimationDuration).OnComplete(() => {
+            mainMenuCanvas.gameObject.SetActive(true);
+            ToggleButtonInteractions(true);
+        });
     }
 
     public void OnClickCloseButton()
@@ -90,56 +97,23 @@ public class UIAnimationManager : MonoBehaviour
         {
             if(canvas.Value.gameObject.activeInHierarchy)
             {
-                StartCoroutine(MoveCanvasDown(canvas.Value));
+                MainMenuCanvasMoveToRenderArea();
+                canvas.Value.DOAnchorPos(yStartingPos, canvasAnimationDuration).OnComplete(() => {
+                    CloseAllCanvas();
+                });
             }
         }
     }
-
-    IEnumerator MoveCanvasDown(RectTransform value)
-    {
-        value.DOAnchorPos(yStartingPos, canvasAnimationDuration);
-        MainMenuCanvasMoveToRenderArea();
-
-        yield return new WaitForSeconds(canvasAnimationDuration);
-        
-        UIManager.instance.CloseAllCanvas();
-    }
-
     public void MoveCanvasUp(string name)
     {
-        foreach(var canvas in canvasRectDictionary)
+        foreach (var canvas in canvasRectDictionary)
         {
-            if(string.Equals(name, canvas.Key))
+            if (string.Equals(name, canvas.Key))
             {
                 canvas.Value.DOAnchorPos(renderArea, canvasAnimationDuration);
             }
         }
         MainMenuCanvasMoveOutSideRenderArea();
-    }
-
-    IEnumerator MainMenuCanvasMoveOutSideRenderAreaCoroutine()
-    {
-        mainMenuCanvas.DOAnchorPos(yStartingPos * -1, canvasAnimationDuration).OnComplete(() => {
-            //Debug.Log("Hello Wordl");
-        });
-        ToggleButtonInteractions(false);
-        
-        yield return new WaitForSeconds(canvasAnimationDuration);
-        
-        ToggleButtonInteractions(true);
-        mainMenuCanvas.gameObject.SetActive(false);
-    }
-
-    IEnumerator MainMenuCanvasMoveToRenderAreaCoroutine()
-    {
-        mainMenuCanvas.DOAnchorPos(renderArea, canvasAnimationDuration);
-        ToggleButtonInteractions(false);
-        mainMenuCanvas.gameObject.SetActive(true);
-
-        yield return new WaitForSeconds(canvasAnimationDuration);
-        
-        mainMenuCanvas.gameObject.SetActive(true);
-        ToggleButtonInteractions(true);
     }
 
     public void ToggleButtonInteractions(bool interactionValue = true)
@@ -148,5 +122,30 @@ public class UIAnimationManager : MonoBehaviour
         {
             mainMenuButtons[i].interactable = interactionValue;
         }
+    }
+
+    public void CloseAllCanvas()
+    {
+        LoadingPanel.SetActive(false);
+        publicApiCanvas.gameObject.SetActive(false);
+        catFactCanvas.gameObject.SetActive(false);
+        nationalityCanvas.gameObject.SetActive(false);
+        knowYourIPCanvas.gameObject.SetActive(false);
+        randomDogImageCanvas.gameObject.SetActive(false);
+        zipcodeCanvas.gameObject.SetActive(false);
+    }
+
+    // Animation Effects
+    public void DoTweenPunchPosition(GameObject gameObject)
+    {
+        gameObject.GetComponent<RectTransform>().DOPunchAnchorPos(new Vector2(10f, 10f), canvasAnimationDuration);
+    }
+
+    public void DoTweenScale(GameObject gameObject)
+    {
+        gameObject.GetComponent<RectTransform>().DOScale(new Vector2(0f, 0f), canvasAnimationDuration).OnComplete(() => {
+            gameObject.SetActive(false);
+            gameObject.transform.localScale = Vector3.one;
+        });
     }
 }

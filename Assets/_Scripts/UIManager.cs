@@ -43,6 +43,9 @@ public class UIManager : MonoBehaviour
     public GameObject zipcodeResponsePanel;
     public GameObject zipcodePatternPrefab;
 
+    [Header("Animation")]
+    public GameObject helpMeCanvas;
+
     private void Awake()
     {
         if (instance == null)
@@ -61,7 +64,7 @@ public class UIManager : MonoBehaviour
         mainMenuCanvas.SetActive(true);
     }
 
-    #region BTN
+    #region BTN_ONCLICK_API
 
     public void BTN_MainMenu()
     {
@@ -214,6 +217,9 @@ public class UIManager : MonoBehaviour
 
     public void BTN_SearchZipCode()
     {
+        // Clear any previous content
+        ClearPreviosContent();
+
         string zipcodeURL = null;
         string[] indianZipCodes = {
                 "110001",
@@ -239,40 +245,43 @@ public class UIManager : MonoBehaviour
             onSuccess =>
             {
                 SearchZipCodeResponse searchZipCodeResponse = JsonConvert.DeserializeObject<SearchZipCodeResponse>(onSuccess);
-                
-                
                 LoadingPanelToggle(false);
                 ShowZipcode(searchZipCodeResponse);
-                
-
-                Debug.Log(onSuccess);
             },
             onFailure =>
             {
                 LoadingPanelToggle(message: "Zipcode Not Present In Database!");
             }));
-    }  
+
+
+        void ClearPreviosContent()
+        {
+            TextMeshProUGUI[] text = zipcodeResponsePanel.GetComponentsInChildren<TextMeshProUGUI>();
+            foreach(TextMeshProUGUI textItem in text)
+                textItem.text = string.Empty;
+        }
+    }
     #endregion
 
-    public void CloseAllCanvas()
+    #region BTN_ANIMATION
+    public void BTN_Anim_Help()
     {
-        loadingPanel.SetActive(false);
-        publicAPICanvas.SetActive(false);
-        catFactAPICanvas.SetActive(false);
-        guessNationalityCanvas.SetActive(false);
-        knowYourIPCanvas.SetActive(false);
-        randomDogImageAPICanvas.SetActive(false);
-
-        // Close the loading panel 
-        LoadingPanelToggle(false);
+        helpMeCanvas.SetActive(true);
+        UIAnimationManager.instance.DoTweenPunchPosition(helpMeCanvas);
     }
+
+    public void BTN_Anim_Help_Close()
+    {
+        UIAnimationManager.instance.DoTweenScale(helpMeCanvas);
+    }
+    #endregion
 
     public void LoadingPanelToggle(bool value = false, string message = "Loading...")
     {
         if(loadingPanel.GetComponentInChildren<TextMeshProUGUI>() != null)
             loadingPanel.GetComponentInChildren<TextMeshProUGUI>().text = message;
         
-        loadingPanel.SetActive(false);
+        loadingPanel.SetActive(value);
 
         if (!string.Equals("Loading...", message))
         {
