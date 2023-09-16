@@ -15,8 +15,6 @@ public class ButtonAnimation : MonoBehaviour, IPointerEnterHandler
     {
         // Store the button's original position
         originalPosition = transform.position;
-
-        Debug.Log(originalPosition);
     }
     public void OnPointerEnter(PointerEventData eventData)
     {

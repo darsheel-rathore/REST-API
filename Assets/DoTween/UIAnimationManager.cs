@@ -14,7 +14,7 @@ public class UIAnimationManager : MonoBehaviour
     private Vector2 xStartingPos = new Vector2(-1600f, 0);
     private Vector2 yStartingPos = new Vector2(0f, -900f);
     private Vector2 renderArea = Vector2.zero;
-    public float canvasAnimationDuration = 2f;
+    public float canvasAnimationDuration = 0.5f;
 
     public CanvasGroup mainMenuCanvasGroup;
 
@@ -35,12 +35,14 @@ public class UIAnimationManager : MonoBehaviour
         RectTransform nationalityCanvas = UIManager.instance.guessNationalityCanvas.GetComponent<RectTransform>();
         RectTransform knowYourIPCanvas = UIManager.instance.knowYourIPCanvas.GetComponent<RectTransform>();
         RectTransform randomDogImageCanvas = UIManager.instance.randomDogImageAPICanvas.GetComponent<RectTransform>();
+        RectTransform zipcodeCanvas = UIManager.instance.zipcodeAPICanvas.GetComponent<RectTransform>();
 
         canvasRectDictionary.Add(publicApiCanvas.gameObject.name, publicApiCanvas);
         canvasRectDictionary.Add(catFactCanvas.gameObject.name, catFactCanvas);
         canvasRectDictionary.Add(nationalityCanvas.gameObject.name, nationalityCanvas);
         canvasRectDictionary.Add(knowYourIPCanvas.gameObject.name, knowYourIPCanvas);
         canvasRectDictionary.Add(randomDogImageCanvas.gameObject.name, randomDogImageCanvas);
+        canvasRectDictionary.Add(zipcodeCanvas.gameObject.name, zipcodeCanvas);
 
         foreach(var canvas in canvasRectDictionary)
         {
@@ -117,7 +119,9 @@ public class UIAnimationManager : MonoBehaviour
 
     IEnumerator MainMenuCanvasMoveOutSideRenderAreaCoroutine()
     {
-        mainMenuCanvas.DOAnchorPos(new Vector2(0, 900f), canvasAnimationDuration);
+        mainMenuCanvas.DOAnchorPos(yStartingPos * -1, canvasAnimationDuration).OnComplete(() => {
+            //Debug.Log("Hello Wordl");
+        });
         ToggleButtonInteractions(false);
         
         yield return new WaitForSeconds(canvasAnimationDuration);

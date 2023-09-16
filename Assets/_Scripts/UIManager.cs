@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Newtonsoft.Json;
+using Unity.VisualScripting;
 
 public class UIManager : MonoBehaviour
 {
@@ -34,6 +36,13 @@ public class UIManager : MonoBehaviour
     public GameObject randomDogImageAPICanvas;
     public Image randomDogImage;
 
+    [Header("Zipcode")]
+    public GameObject zipcodeAPICanvas;
+    public TMP_InputField zipcodeInputField;
+    public TextMeshProUGUI zipcodeHeader;
+    public GameObject zipcodeResponsePanel;
+    public GameObject zipcodePatternPrefab;
+
     private void Awake()
     {
         if (instance == null)
@@ -53,25 +62,196 @@ public class UIManager : MonoBehaviour
     }
 
     #region BTN
-    public void BTN_PublicAPIs() =>REST_Manager.instance.PublicAPIs();
-    public void BTN_CatFactsAPI() => REST_Manager.instance.CatFactAPI();
+
     public void BTN_MainMenu()
     {
         mainMenuCanvas.SetActive(true);
         UIAnimationManager.instance.OnClickCloseButton();
     }
+
     public void BTN_GuessNationalityMainMenu()
     {
-        //CloseAllCanvas();
         guessNationalityCanvas.SetActive(true);
-        UIAnimationManager.instance.MoveCanvasUp(CanvasName._NationalityCanvas);
+        UIAnimationManager.instance.MoveCanvasUp(guessNationalityCanvas.name);
     }
-    public void BTN_GuessNationality() => REST_Manager.instance.GuessNationality(nameInputField);
-    public void BTN_KnowYourIP() => REST_Manager.instance.KnowYourIP();
 
-    public void BTN_RandomDogImage() => REST_Manager.instance.RandomDogImage();
+    public void BTN_SearchZipCodeMainMenu()
+    {
+        zipcodeAPICanvas.SetActive(true);
+        UIAnimationManager.instance.MoveCanvasUp(zipcodeAPICanvas.name);
+    }
 
-    public void BTN_SearchZipCode() => REST_Manager.instance.SearchZipCode();
+    public void BTN_PublicAPIs()
+    {
+        LoadingPanelToggle(true);
+        UIAnimationManager.instance.ToggleButtonInteractions(false);
+
+        StartCoroutine(REST_Manager.FetchAndDeserializeJSON_Coroutine(APIs._PublicAPIs, 
+            (onSuccess) => { 
+                PublicAPIResponse publicAPIResponse = JsonUtility.FromJson<PublicAPIResponse>(onSuccess);
+
+                ShowPubliAPICanvas(publicAPIResponse);
+                LoadingPanelToggle(false);
+                UIAnimationManager.instance.MoveCanvasUp(publicAPICanvas.name);
+            }, 
+            (onFailure) => {
+                LoadingPanelToggle(message: onFailure);
+            }
+            ));
+    }
+
+    public void BTN_CatFactsAPI()
+    {
+        // Enable Loading Panel
+        LoadingPanelToggle(true);
+        // Toggle Main Menu Interaction Button
+        UIAnimationManager.instance.ToggleButtonInteractions(false);
+
+        StartCoroutine(REST_Manager.FetchAndDeserializeJSON_Coroutine(APIs._CatFacts, 
+            (onSuccess) => 
+            { 
+                CatFactsAPIResponse catFactsAPIResponse = JsonUtility.FromJson<CatFactsAPIResponse>(onSuccess);
+        
+                // Show UI
+                ShowCatFactAPICanvas(catFactsAPIResponse);
+
+                // Disable Loading Panel
+                LoadingPanelToggle(false);
+
+                // Enable Animation
+                UIAnimationManager.instance.MoveCanvasUp(catFactAPICanvas.name);
+            }, 
+            (onFailure) =>
+            {
+                // Show Loading/Error Panel
+                LoadingPanelToggle(message: onFailure);
+            }));
+    }
+
+    public void BTN_GuessNationality()
+    {
+        string nameURL = null;
+        string[] randomNames = { "Rohit", "Shubham", "Ishan", "Suraj", "Prince", "Praveen", "Ashu", "Sudarshan", "Daniel", "Gautam"};
+
+        if (string.IsNullOrEmpty(nameInputField.text))
+            nameURL = APIs._NationalizeIO + randomNames[Random.Range(0, randomNames.Length)];
+        else
+            nameURL = APIs._NationalizeIO + nameInputField.text;
+
+        LoadingPanelToggle(true);
+        UIAnimationManager.instance.ToggleButtonInteractions(false);
+
+        StartCoroutine(REST_Manager.FetchAndDeserializeJSON_Coroutine(nameURL,
+            (onSuccess) =>
+            {
+                NationalityAPIResponse nationalityAPIResponse = JsonUtility.FromJson<NationalityAPIResponse>(onSuccess);
+
+                ShowNationality(nationalityAPIResponse);
+
+                LoadingPanelToggle(false);
+            },
+            (onFailure) =>
+            {
+                LoadingPanelToggle(message: onFailure);
+            }));   
+    }
+
+    public void BTN_KnowYourIP()
+    {
+        LoadingPanelToggle(true);
+        UIAnimationManager.instance.ToggleButtonInteractions(false);
+
+        StartCoroutine(REST_Manager.FetchAndDeserializeJSON_Coroutine(APIs._IP,
+            (onSuccess) => 
+            {
+                KnowYourIP knowYourIP = JsonUtility.FromJson<KnowYourIP>(onSuccess);
+                ShowYourIP(knowYourIP);
+                LoadingPanelToggle(false);
+                UIAnimationManager.instance.MoveCanvasUp(knowYourIPCanvas.name);
+            }, 
+            (onFailure) => 
+            {
+                LoadingPanelToggle(message: onFailure);
+            }));
+    }
+
+    public void BTN_RandomDogImage()
+    {
+        LoadingPanelToggle(true);
+        UIAnimationManager.instance.ToggleButtonInteractions(false);
+
+        StartCoroutine(REST_Manager.FetchAndDeserializeJSON_Coroutine(APIs._Dogs,
+            (onSuccess) => 
+            {
+                RandomDogImageResponse randomDogImageResponse = JsonUtility.FromJson<RandomDogImageResponse>(onSuccess);
+
+                string textureURL = randomDogImageResponse.message;
+
+                // Download Image
+                StartCoroutine(REST_Manager.DownloadTextureFromURL_Coroutine(textureURL,
+                    (onSuccess) => 
+                    {
+                        var randomDogImage = onSuccess;
+                        ShowRandomDogImage(randomDogImage);
+
+                        // Show Animation
+                        UIAnimationManager.instance.MoveCanvasUp(randomDogImageAPICanvas.name);
+
+                        // Disable loading panel
+                        LoadingPanelToggle(false);
+
+                    }, 
+                    (onFailure) => 
+                    {
+                        LoadingPanelToggle(message: onFailure);
+                    }));
+            }, 
+            (onFailure) => 
+            {
+                LoadingPanelToggle(message: onFailure);
+            }));
+    }
+
+    public void BTN_SearchZipCode()
+    {
+        string zipcodeURL = null;
+        string[] indianZipCodes = {
+                "110001",
+                "400001",
+                "700001",
+                "600001",
+                "500001",
+                "380001",
+                "560001",
+                "440001",
+                "641001",
+                "250001" 
+        };
+
+        if (string.IsNullOrEmpty(zipcodeInputField.text))
+            zipcodeURL = APIs._Zippopotam + indianZipCodes[Random.Range(0, indianZipCodes.Length)];
+        else
+            zipcodeURL = APIs._Zippopotam + zipcodeInputField.text;
+
+        LoadingPanelToggle(true);
+
+        StartCoroutine(REST_Manager.FetchAndDeserializeJSON_Coroutine(zipcodeURL,
+            onSuccess =>
+            {
+                SearchZipCodeResponse searchZipCodeResponse = JsonConvert.DeserializeObject<SearchZipCodeResponse>(onSuccess);
+                
+                
+                LoadingPanelToggle(false);
+                ShowZipcode(searchZipCodeResponse);
+                
+
+                Debug.Log(onSuccess);
+            },
+            onFailure =>
+            {
+                LoadingPanelToggle(message: "Zipcode Not Present In Database!");
+            }));
+    }  
     #endregion
 
     public void CloseAllCanvas()
@@ -84,17 +264,20 @@ public class UIManager : MonoBehaviour
         randomDogImageAPICanvas.SetActive(false);
 
         // Close the loading panel 
-        LoadingPanel(false);
+        LoadingPanelToggle(false);
     }
 
-    public void LoadingPanel(bool value = false, string message = "Loading...")
+    public void LoadingPanelToggle(bool value = false, string message = "Loading...")
     {
-        loadingPanel.GetComponentInChildren<TextMeshProUGUI>().text = message;
-        loadingPanel.SetActive(value);
+        if(loadingPanel.GetComponentInChildren<TextMeshProUGUI>() != null)
+            loadingPanel.GetComponentInChildren<TextMeshProUGUI>().text = message;
+        
+        loadingPanel.SetActive(false);
 
         if (!string.Equals("Loading...", message))
         {
-            loadingPanel.GetComponentInChildren<Slider>().gameObject.SetActive(false);
+            if(loadingPanel.GetComponentInChildren<Slider>() != null)
+                loadingPanel.GetComponentInChildren<Slider>().gameObject.SetActive(false);
             loadingPanel.SetActive(true);
         }
     }
@@ -141,7 +324,6 @@ public class UIManager : MonoBehaviour
     public void ShowCatFactAPICanvas(CatFactsAPIResponse response)
     {
         catFactAPICanvas.SetActive(true);
-
         catFactText.text = response.fact;
     }
 
@@ -158,16 +340,42 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowYourIP(KnowYourIP knowYourIP)
+    public void ShowYourIP(KnowYourIP response)
     {
         knowYourIPCanvas.SetActive(true);
-        knowYourIPText.text = knowYourIP.ip;
+        knowYourIPText.text = response.ip;
     }
 
-    public void ShowRandomDogImage(Sprite dogImage)
+    public void ShowRandomDogImage(Sprite response)
     {
         randomDogImageAPICanvas.SetActive(true);
-        randomDogImage.sprite = dogImage;
+        randomDogImage.sprite = response;
+    }
+
+    public void ShowZipcode(SearchZipCodeResponse response)
+    {
+        if(zipcodePatternPrefab != null && zipcodeResponsePanel != null)
+        {
+            // Display zipcode heading
+            zipcodeHeader.text = $"Post Code: {response.post_code}";
+
+            TextMeshProUGUI[] text = zipcodeResponsePanel.GetComponentsInChildren<TextMeshProUGUI>();
+
+            var iteration = response.places.Count;
+            if (response.places.Count > 4)
+                iteration = 4;
+
+            for(int i = 0; i < iteration; i++)
+            {
+                string textPattern = $"{i+1}. Place Name : <b>{response.places[i].place_name}</b> | State : {response.places[i].state}";
+
+                text[i].text = textPattern;
+            }
+        }
+        else
+        {
+            LoadingPanelToggle(message: "Error In Zipcode Response Panel");
+        }
     }
     #endregion
 }

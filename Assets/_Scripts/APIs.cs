@@ -20,13 +20,3 @@ public static class APIs
 
     public const string _Zippopotam = "https://api.zippopotam.us/IN/";
 }
-
-public static class CanvasName
-{
-    public static string _MainMenuCanvas = UIManager.instance.mainMenuCanvas.name;
-    public static string _PubliAPICanvas = UIManager.instance.publicAPICanvas.name;
-    public static string _CatFactCanvas = UIManager.instance.catFactAPICanvas.name;
-    public static string _NationalityCanvas = UIManager.instance.guessNationalityCanvas.name;
-    public static string _KnowYourIPCanvas = UIManager.instance.knowYourIPCanvas.name;
-    public static string _RandomDogImageCanvas = UIManager.instance.randomDogImageAPICanvas.name;
-}
