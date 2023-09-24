@@ -66,6 +66,7 @@ public class UIManager : MonoBehaviour
 
     #region BTN_ONCLICK_API
 
+
     public void BTN_MainMenu()
     {
         mainMenuCanvas.SetActive(true);
@@ -74,18 +75,24 @@ public class UIManager : MonoBehaviour
 
     public void BTN_GuessNationalityMainMenu()
     {
+        LoadingPanelToggle(false);
         guessNationalityCanvas.SetActive(true);
         UIAnimationManager.instance.MoveCanvasUp(guessNationalityCanvas.name);
     }
 
     public void BTN_SearchZipCodeMainMenu()
     {
+        LoadingPanelToggle(false);
         zipcodeAPICanvas.SetActive(true);
         UIAnimationManager.instance.MoveCanvasUp(zipcodeAPICanvas.name);
     }
 
     public void BTN_PublicAPIs()
     {
+        // Check Internet Connection
+        if (!CheckNetworkConnectivity())
+            return;
+
         LoadingPanelToggle(true);
         UIAnimationManager.instance.ToggleButtonInteractions(false);
 
@@ -99,12 +106,17 @@ public class UIManager : MonoBehaviour
             }, 
             (onFailure) => {
                 LoadingPanelToggle(message: onFailure);
+                UIAnimationManager.instance.ToggleButtonInteractions(true);
             }
             ));
     }
 
     public void BTN_CatFactsAPI()
     {
+        // Check Internet Connection
+        if (!CheckNetworkConnectivity())
+            return;
+
         // Enable Loading Panel
         LoadingPanelToggle(true);
         // Toggle Main Menu Interaction Button
@@ -128,11 +140,16 @@ public class UIManager : MonoBehaviour
             {
                 // Show Loading/Error Panel
                 LoadingPanelToggle(message: onFailure);
+                UIAnimationManager.instance.ToggleButtonInteractions(true);
             }));
     }
 
     public void BTN_GuessNationality()
     {
+        // Check Internet Connection
+        if (!CheckNetworkConnectivity())
+            return;
+
         string nameURL = null;
         string[] randomNames = { "Rohit", "Shubham", "Ishan", "Suraj", "Prince", "Praveen", "Ashu", "Sudarshan", "Daniel", "Gautam"};
 
@@ -161,6 +178,10 @@ public class UIManager : MonoBehaviour
 
     public void BTN_KnowYourIP()
     {
+        // Check Internet Connection
+        if (!CheckNetworkConnectivity())
+            return;
+
         LoadingPanelToggle(true);
         UIAnimationManager.instance.ToggleButtonInteractions(false);
 
@@ -175,11 +196,16 @@ public class UIManager : MonoBehaviour
             (onFailure) => 
             {
                 LoadingPanelToggle(message: onFailure);
+                UIAnimationManager.instance.ToggleButtonInteractions(true);
             }));
     }
 
     public void BTN_RandomDogImage()
     {
+        // Check Internet Connection
+        if (!CheckNetworkConnectivity())
+            return;
+
         LoadingPanelToggle(true);
         UIAnimationManager.instance.ToggleButtonInteractions(false);
 
@@ -212,11 +238,16 @@ public class UIManager : MonoBehaviour
             (onFailure) => 
             {
                 LoadingPanelToggle(message: onFailure);
+                UIAnimationManager.instance.ToggleButtonInteractions(true);
             }));
     }
 
     public void BTN_SearchZipCode()
     {
+        // Check Internet Connection
+        if (!CheckNetworkConnectivity())
+            return;
+
         // Clear any previous content
         ClearPreviosContent();
 
@@ -289,6 +320,37 @@ public class UIManager : MonoBehaviour
                 loadingPanel.GetComponentInChildren<Slider>().gameObject.SetActive(false);
             loadingPanel.SetActive(true);
         }
+    }
+    private bool CheckNetworkConnectivity()
+    {
+        // Check the network reachability status
+        NetworkReachability reachability = Application.internetReachability;
+
+        var isConnectedToNetwork = false;
+
+        // Check the reachability status and take action accordingly
+        switch (reachability)
+        {
+            case NetworkReachability.NotReachable:
+                // Handle the case where there is no network connection
+                isConnectedToNetwork = false;
+                LoadingPanelToggle(true, message: "Not connected to the network.");
+                break;
+
+            case NetworkReachability.ReachableViaCarrierDataNetwork:
+                isConnectedToNetwork = true;
+                LoadingPanelToggle(false);
+                // Handle the case where the user is connected through mobile data
+                break;
+
+            case NetworkReachability.ReachableViaLocalAreaNetwork:
+                isConnectedToNetwork = true;
+                LoadingPanelToggle(false);
+                // Handle the case where the user is connected through Wi-Fi or LAN
+                break;
+        }
+
+        return isConnectedToNetwork;
     }
 
     #region Main-Menu-Btn-Instruction

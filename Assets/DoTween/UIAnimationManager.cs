@@ -32,6 +32,7 @@ public class UIAnimationManager : MonoBehaviour
     {
         instance = this;
         canvasRectDictionary = new Dictionary<string, RectTransform>();
+        DOTween.Init();
     }
 
     void Start()
@@ -55,15 +56,15 @@ public class UIAnimationManager : MonoBehaviour
         mainMenuCanvasGroup = mainMenuCanvas.GetComponent<CanvasGroup>();
         mainMenuCanvasGroup.alpha = 0;
 
-        // Starup Animation
-        MainMenuStartUpAnimationCoroutine();
+        MainMenuStartUpAnimation();
     }
 
-    private void MainMenuStartUpAnimationCoroutine()
+    public void MainMenuStartUpAnimation()
     {
         ToggleButtonInteractions(false);
 
         mainMenuCanvas.DOAnchorPos(renderArea, canvasAnimationDuration).OnComplete(() => {
+            
             ToggleButtonInteractions(true);
         });
 
